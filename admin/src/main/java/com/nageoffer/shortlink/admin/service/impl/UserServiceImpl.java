@@ -48,13 +48,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     @Override
     public void register(UserRegisterReqDTO requestParam) {
+        //用户名是否可用
         if(!hasUsername(requestParam.getUsername())){
             throw new ClientException(UserErrorCodeEnum.USER_NAME_EXIST);
         }
+        //插入数据库
         int inserted = baseMapper.insert(BeanUtil.toBean(requestParam, UserDO.class));
         if (inserted < 1) {
             throw new ClientException(USER_SAVE_ERROR);
         }
+        //插入布隆过滤器
         userRegisterCachePenetrationBloomFilter.add(requestParam.getUsername());
     }
 
