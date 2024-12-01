@@ -6,10 +6,10 @@ import lombok.Data;
 
 /**
  * @FileName UserRespDTO
- * @Description 用户返回参数实体
+ * @Description 真实用户返回参数实体，手机号不加密
  */
 @Data
-public class UserRespDTO {
+public class UserActualRespDTO {
     /**
      * ID
      */
@@ -28,9 +28,6 @@ public class UserRespDTO {
     /**
      * 手机号
      */
-    //在springboot进行json序列化时，
-    // 使用PhoneDesensitizationSerializer对该字段进行json序列化，进行加密
-    @JsonSerialize(using = PhoneDesensitizationSerializer.class)
     private String phone;
 
     /**
