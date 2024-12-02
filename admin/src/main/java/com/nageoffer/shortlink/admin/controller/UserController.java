@@ -86,4 +86,14 @@ public class UserController {
                                       @RequestHeader String username) {
         return Results.success(userService.checkLogin(token,username));
     }
+
+    /**
+    * 退出登录
+    */
+    @DeleteMapping("/api/short-link/admin/v1/user/logout")
+    public Result<Void> logout(@RequestHeader String token,
+                               @RequestHeader String username) {
+        userService.logout(token,username);
+        return Results.success();
+    }
 }
