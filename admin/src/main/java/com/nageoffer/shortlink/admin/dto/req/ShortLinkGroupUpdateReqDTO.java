@@ -3,10 +3,11 @@ package com.nageoffer.shortlink.admin.dto.req;
 import lombok.Data;
 
 /**
- * @FileName GroupRegisterReqDTO
+ * @FileName ShortLinkGroupUpdateReqDTO
  * @Description
  */
 @Data
-public class ShortLinkGroupSaveReqDTO {
+public class ShortLinkGroupUpdateReqDTO {
+    private String gid;
     private String name;
 }
