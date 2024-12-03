@@ -15,6 +15,8 @@ import org.springframework.util.StringUtils;
 import com.nageoffer.shortlink.admin.common.constant.UserConstant;
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.concurrent.TimeUnit;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
@@ -39,6 +41,8 @@ public class UserTransmitFilter implements Filter {
             UserInfoDTO userInfoDTO = JSON.parseObject(userInfoJsonStr.toString(), UserInfoDTO.class);
             //log.info("当前用户："+userInfoDTO.toString());
             UserContext.setUser(userInfoDTO);
+            //给redis中缓存的当前用户信息续期
+            redisTemplate.expire("login_"+username,30, TimeUnit.MINUTES);
         }
         try {
             filterChain.doFilter(servletRequest, servletResponse);
