@@ -5,6 +5,7 @@ import cn.hutool.core.img.gif.GifDecoder;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.nageoffer.shortlink.admin.common.biz.user.UserContext;
 import com.nageoffer.shortlink.admin.common.convention.exception.ClientException;
 import com.nageoffer.shortlink.admin.dao.entity.GroupDO;
 import com.nageoffer.shortlink.admin.dao.mapper.GroupMapper;
@@ -38,8 +39,8 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .gid(gid)
                 .name(groupName)
                 .sortOrder(0)
-                //TODO 设置用户名
-                .username(null)
+                // 设置用户名
+                .username(UserContext.getUsername())
                 .build();
         baseMapper.insert(groupDO);
     }
@@ -48,8 +49,8 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
     public List<ShortLinkGroupRespDTO> listGroup() {
         LambdaQueryWrapper<GroupDO> queryWrapper = Wrappers.lambdaQuery(GroupDO.class)
                 .eq(GroupDO::getDelFlag,0)
-                //TODO 设置用户名
-                .eq(GroupDO::getUsername, "xb")
+                // 设置用户名
+                .eq(GroupDO::getUsername, UserContext.getUsername())
                 .orderByDesc(GroupDO::getSortOrder)
                 .orderByDesc(GroupDO::getUpdateTime);
         List<GroupDO> groupDOList = baseMapper.selectList(queryWrapper);
@@ -62,8 +63,8 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
     private boolean hasGid(String gid) {
         LambdaQueryWrapper<GroupDO> queryWrapper = Wrappers.lambdaQuery(GroupDO.class)
                 .eq(GroupDO::getGid, gid)
-                //TODO 设置用户名
-                .eq(GroupDO::getUsername, null);
+                // 设置用户名
+                .eq(GroupDO::getUsername, UserContext.getUsername());
         GroupDO hasGidFlag = baseMapper.selectOne(queryWrapper);
         return hasGidFlag == null;
     }

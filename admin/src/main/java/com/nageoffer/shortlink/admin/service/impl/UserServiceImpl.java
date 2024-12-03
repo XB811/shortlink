@@ -8,6 +8,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.nageoffer.shortlink.admin.common.biz.user.UserContext;
+import com.nageoffer.shortlink.admin.common.biz.user.UserInfoDTO;
 import com.nageoffer.shortlink.admin.common.convention.exception.ClientException;
 import com.nageoffer.shortlink.admin.common.enums.UserErrorCodeEnum;
 import com.nageoffer.shortlink.admin.config.RBloomFilterConfiguration;
@@ -19,7 +21,9 @@ import com.nageoffer.shortlink.admin.dto.req.UserUpdateReqDTO;
 import com.nageoffer.shortlink.admin.dto.resp.UserLoginRespDTO;
 import com.nageoffer.shortlink.admin.dto.resp.UserRespDTO;
 import com.nageoffer.shortlink.admin.service.UserService;
+import groovy.util.logging.Slf4j;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import org.redisson.Redisson;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
@@ -45,7 +49,9 @@ import static com.nageoffer.shortlink.admin.common.enums.UserErrorCodeEnum.USER_
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserService {
+    //布隆过滤器
     private final RBloomFilter<String> userRegisterCachePenetrationBloomFilter;
     private final RedissonClient redissonClient;
     private final StringRedisTemplate stringRedisTemplate;
@@ -99,7 +105,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     @Override
     public void update(UserUpdateReqDTO requestParam) {
-        //TODO 验证当前用户是否为登录用户
+        // 验证当前用户是否为登录用户
+        if(requestParam.getUsername()==null|| !requestParam.getUsername().equals(UserContext.getUsername())){
+            throw new ClientException("用户信息不一致");
+        }
         LambdaUpdateWrapper<UserDO> updateWrapper = Wrappers.lambdaUpdate(UserDO.class)
                 .eq(UserDO::getUsername, requestParam.getUsername());
         baseMapper.update(BeanUtil.toBean(requestParam,UserDO.class),updateWrapper);
@@ -127,7 +136,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
          val：json字符串（用户信息）
          */
         String uuid = UUID.randomUUID().toString();
-        stringRedisTemplate.opsForHash().put("login_"+userDO.getUsername(),uuid,JSON.toJSONString(userDO));
+        UserInfoDTO userInfoDTO = BeanUtil.copyProperties(userDO, UserInfoDTO.class);
+        userInfoDTO.setToken(uuid);
+        userInfoDTO.setUserId(String.valueOf(userDO.getId()));
+        stringRedisTemplate.opsForHash().put("login_"+userDO.getUsername(),uuid,JSON.toJSONString(userInfoDTO));
         stringRedisTemplate.expire("login_"+userDO.getUsername(),30,TimeUnit.MINUTES);
         return UserLoginRespDTO.builder().token(uuid).build();
     }
