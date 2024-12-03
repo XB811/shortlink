@@ -32,6 +32,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
         GroupDO groupDO = GroupDO.builder()
                 .gid(gid)
                 .name(groupName)
+                .sortOrder(0)
                 //TODO 设置用户名
                 .username(null)
                 .build();
