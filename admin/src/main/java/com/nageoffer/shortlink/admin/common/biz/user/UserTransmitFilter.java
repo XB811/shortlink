@@ -1,6 +1,7 @@
 package com.nageoffer.shortlink.admin.common.biz.user;
 
 import com.alibaba.fastjson2.JSON;
+import com.google.common.collect.Lists;
 import com.nageoffer.shortlink.admin.dao.entity.UserDO;
 import groovy.util.logging.Slf4j;
 import jakarta.servlet.Filter;
@@ -15,6 +16,7 @@ import org.springframework.util.StringUtils;
 import com.nageoffer.shortlink.admin.common.constant.UserConstant;
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -30,24 +32,33 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class UserTransmitFilter implements Filter {
     private final StringRedisTemplate redisTemplate;
 
+    private static final List<String> IGNORE_URL = Lists.newArrayList(
+            "/api/short-link/admin/v1/user/login",
+            "/api/short-link/admin/v1/user/has-username"
+    );
+
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
-        String token = httpServletRequest.getHeader(UserConstant.USER_TOKEN_KEY);
-        String username = httpServletRequest.getHeader(UserConstant.USER_NAME_KEY);
-        //查询redis
-        Object userInfoJsonStr = redisTemplate.opsForHash().get("login_" + username, token);
-        if (userInfoJsonStr != null) {
-            UserInfoDTO userInfoDTO = JSON.parseObject(userInfoJsonStr.toString(), UserInfoDTO.class);
-            //log.info("当前用户："+userInfoDTO.toString());
-            UserContext.setUser(userInfoDTO);
-            //给redis中缓存的当前用户信息续期
-            redisTemplate.expire("login_"+username,30, TimeUnit.MINUTES);
+        String requestURL = String.valueOf(httpServletRequest.getRequestURL());
+        if(!IGNORE_URL.contains(requestURL)){
+            String token = httpServletRequest.getHeader(UserConstant.USER_TOKEN_KEY);
+            String username = httpServletRequest.getHeader(UserConstant.USER_NAME_KEY);
+            //查询redis
+            Object userInfoJsonStr = redisTemplate.opsForHash().get("login_" + username, token);
+            if (userInfoJsonStr != null) {
+                UserInfoDTO userInfoDTO = JSON.parseObject(userInfoJsonStr.toString(), UserInfoDTO.class);
+                //log.info("当前用户："+userInfoDTO.toString());
+                UserContext.setUser(userInfoDTO);
+                //给redis中缓存的当前用户信息续期
+                redisTemplate.expire("login_"+username,30, TimeUnit.MINUTES);
+            }
+            try {
+                filterChain.doFilter(servletRequest, servletResponse);
+            } finally {
+                UserContext.removeUser();
+            }
         }
-        try {
-            filterChain.doFilter(servletRequest, servletResponse);
-        } finally {
-            UserContext.removeUser();
-        }
+
     }
 }
