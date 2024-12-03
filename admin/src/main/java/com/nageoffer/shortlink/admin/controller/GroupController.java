@@ -34,4 +34,12 @@ public class GroupController {
     public Result<List<ShortLinkGroupRespDTO>> listGroup(){
         return Results.success(groupService.listGroup());
     }
+    /*
+    修改短链接分组
+     */
+    @PutMapping("/api/short-link/admin/v1/group")
+    public Result<Void> updateGroup(@RequestBody ShortLinkGroupSaveReqDTO requestParam){
+        groupService.update(requestParam);
+        return Results.success();
+    }
 }
