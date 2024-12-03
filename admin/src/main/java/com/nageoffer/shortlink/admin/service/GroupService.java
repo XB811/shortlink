@@ -9,4 +9,12 @@ import com.nageoffer.shortlink.admin.dao.entity.GroupDO;
  */
 
 public interface GroupService extends IService<GroupDO> {
+    /**
+     * 新增短链接分组
+     *
+     * @param groupName 短链接分组名
+     * @return
+     * @Date 2024/12/3 16:20
+     */
+    void register(String groupName);
 }
