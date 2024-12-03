@@ -3,12 +3,12 @@ package com.nageoffer.shortlink.admin.controller;
 import com.nageoffer.shortlink.admin.common.convention.result.Result;
 import com.nageoffer.shortlink.admin.common.convention.result.Results;
 import com.nageoffer.shortlink.admin.dto.req.ShortLinkGroupSaveReqDTO;
+import com.nageoffer.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
 import com.nageoffer.shortlink.admin.service.GroupService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @FileName GroupController
@@ -26,5 +26,12 @@ public class GroupController {
     public Result<Void> register(@RequestBody ShortLinkGroupSaveReqDTO requestParam){
         groupService.register(requestParam.getName());
         return Results.success();
+    }
+    /*
+    查询分组集合
+     */
+    @GetMapping("/api/short-link/admin/v1/group")
+    public Result<List<ShortLinkGroupRespDTO>> listGroup(){
+        return Results.success(groupService.listGroup());
     }
 }
