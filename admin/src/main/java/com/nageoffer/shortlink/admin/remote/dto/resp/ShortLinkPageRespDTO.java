@@ -1,4 +1,4 @@
-package com.nageoffer.shortlink.project.dto.resp;
+package com.nageoffer.shortlink.admin.remote.dto.resp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;

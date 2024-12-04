@@ -1,16 +1,21 @@
-package com.nageoffer.shortlink.project.dto.resp;
+package com.nageoffer.shortlink.admin.dao.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.nageoffer.shortlink.admin.common.database.BaseDO;
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.Date;
 
 /**
- * @ FileName ShortLinkPageRespDTO
- * @ Description 短链接分页返回参数
+ * @FileName LinkDAO
+ * @Description 短链接实体
  */
 @Data
-public class ShortLinkPageRespDTO {
+@TableName("t_link")
+@Builder
+public class ShortLinkDO extends BaseDO {
     /**
      * 域名
      */
@@ -42,6 +47,16 @@ public class ShortLinkPageRespDTO {
     private String gid;
 
     /**
+     * 启用标识 0：启用 1：未启用
+     */
+    private Integer enableStatus;
+
+    /**
+     * 创建类型 0：接口 1：控制台
+     */
+    private Integer createdType;
+
+    /**
      * 有效期类型 0：永久有效 1：用户自定义
      */
     private Integer validDateType;
@@ -49,21 +64,15 @@ public class ShortLinkPageRespDTO {
     /**
      * 有效期
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private Date validDate;
 
     /**
      * 描述
      */
+    @TableField("`describe`")
     private String describe;
-
-    /**
-    * 网站表示
-    */
-    private String favicon;
-    /**
-     * 创建时间
+    /*
+    网站表示
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-    private Date createTime;
+    private String favicon;
 }
