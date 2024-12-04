@@ -11,11 +11,15 @@ import com.nageoffer.shortlink.admin.dao.mapper.GroupMapper;
 import com.nageoffer.shortlink.admin.dto.req.ShortLinkGroupSortReqDTO;
 import com.nageoffer.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import com.nageoffer.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
+import com.nageoffer.shortlink.admin.remote.ShortLinkRemoteService;
+import com.nageoffer.shortlink.admin.remote.dto.resp.ShortLinkCountQueryRespDTO;
 import com.nageoffer.shortlink.admin.service.GroupService;
 import com.nageoffer.shortlink.admin.toolkit.RandomGenerator;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @FileName GroupServiceImpl
@@ -24,6 +28,8 @@ import java.util.List;
 @Service
 public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implements GroupService {
 
+    ShortLinkRemoteService shortLinkRemoteService = new ShortLinkRemoteService() {
+    };
     @Override
     public void register(String groupName) {
         //生成6位的随机分组id
@@ -52,7 +58,19 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .orderByDesc(GroupDO::getSortOrder)
                 .orderByDesc(GroupDO::getUpdateTime);
         List<GroupDO> groupDOList = baseMapper.selectList(queryWrapper);
-        return BeanUtil.copyToList(groupDOList, ShortLinkGroupRespDTO.class);
+        //远程调用获取gid对应的短链接数量
+        List<ShortLinkCountQueryRespDTO> data = shortLinkRemoteService.listShortLinkCount(groupDOList.stream().map(GroupDO::getGid).toList()).getData();
+        //List to Map
+        Map<String,Integer> shortLinkCountMap =new HashMap<>();
+        data.forEach(each->{
+            shortLinkCountMap.put(each.getGid(),each.getShortLinkCount());
+        });
+        //整合响应结果
+        List<ShortLinkGroupRespDTO> shortLinkGroupRespDTOList = BeanUtil.copyToList(groupDOList, ShortLinkGroupRespDTO.class);
+        shortLinkGroupRespDTOList.forEach(each->{
+            each.setShortLinkCount(shortLinkCountMap.get(each.getGid()));
+        });
+        return shortLinkGroupRespDTOList;
     }
 
     @Override

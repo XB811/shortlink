@@ -29,14 +29,14 @@ public class GroupController {
         groupService.register(requestParam.getName());
         return Results.success();
     }
-    /*
+    /**
     查询分组集合
      */
     @GetMapping("/api/short-link/admin/v1/group")
     public Result<List<ShortLinkGroupRespDTO>> listGroup(){
         return Results.success(groupService.listGroup());
     }
-    /*
+    /**
     修改短链接分组
      */
     @PutMapping("/api/short-link/admin/v1/group")
@@ -45,7 +45,7 @@ public class GroupController {
         return Results.success();
     }
 
-    /*
+    /**
     删除短链接分组
      */
     @DeleteMapping("/api/short-link/admin/v1/group")
@@ -53,7 +53,7 @@ public class GroupController {
         groupService.deleteGroup(gid);
         return Results.success();
     }
-    /*
+    /**
     排序短链接分组
      */
     @PostMapping("/api/short-link/admin/v1/group/sort")

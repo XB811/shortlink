@@ -32,6 +32,12 @@ public class ShortLinkController {
         };
         return shortLinkRemoteService.pageShortLink(requestParam);
     }
+    /**
+    * 新增短链接
+    * @param requestParam 
+    * @return Result<ShortLinkCreateRespDTO> 
+    * @Date 2024/12/5 02:56
+    */
     @PostMapping("/api/short-link/admin/v1/create")
     public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam) {
         ShortLinkRemoteService shortLinkRemoteService = new ShortLinkRemoteService() {
