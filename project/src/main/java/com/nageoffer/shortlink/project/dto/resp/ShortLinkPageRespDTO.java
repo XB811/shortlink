@@ -1,21 +1,15 @@
-package com.nageoffer.shortlink.project.dao.entity;
+package com.nageoffer.shortlink.project.dto.resp;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.nageoffer.shortlink.project.common.database.BaseDO;
-import lombok.Builder;
 import lombok.Data;
 
 import java.util.Date;
 
 /**
- * @FileName LinkDAO
- * @Description 短链接实体
+ * @ FileName ShortLinkPageRespDTO
+ * @ Description 短链接分页返回参数
  */
 @Data
-@TableName("t_link")
-@Builder
-public class ShortLinkDO extends BaseDO {
+public class ShortLinkPageRespDTO {
     /**
      * 域名
      */
@@ -47,16 +41,6 @@ public class ShortLinkDO extends BaseDO {
     private String gid;
 
     /**
-     * 启用标识 0：启用 1：未启用
-     */
-    private Integer enableStatus;
-
-    /**
-     * 创建类型 0：接口 1：控制台
-     */
-    private Integer createdType;
-
-    /**
      * 有效期类型 0：永久有效 1：用户自定义
      */
     private Integer validDateType;
@@ -69,10 +53,10 @@ public class ShortLinkDO extends BaseDO {
     /**
      * 描述
      */
-    @TableField("`describe`")
     private String describe;
-    /*
-    网站表示
-     */
+
+    /**
+    * 网站表示
+    */
     private String favicon;
 }
