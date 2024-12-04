@@ -31,12 +31,15 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
     ShortLinkRemoteService shortLinkRemoteService = new ShortLinkRemoteService() {
     };
     @Override
-    public void register(String groupName) {
+    public void register(String groupName){
+        register(UserContext.getUsername(),groupName);
+    }
+    public void register(String username,String groupName) {
         //生成6位的随机分组id
         String gid;
         while(true) {
             gid = RandomGenerator.generateRandom();
-            if(hasGid(gid))break;
+            if(hasGid(username,gid))break;
         }
         //新增到数据库
         GroupDO groupDO = GroupDO.builder()
@@ -44,7 +47,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .name(groupName)
                 .sortOrder(0)
                 // 设置用户名
-                .username(UserContext.getUsername())
+                .username(username)
                 .build();
         baseMapper.insert(groupDO);
     }
@@ -110,11 +113,11 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
     /*
     检测gid是否可用
      */
-    private boolean hasGid(String gid) {
+    private boolean hasGid(String username,String gid) {
         LambdaQueryWrapper<GroupDO> queryWrapper = Wrappers.lambdaQuery(GroupDO.class)
                 .eq(GroupDO::getGid, gid)
                 // 设置用户名
-                .eq(GroupDO::getUsername, UserContext.getUsername());
+                .eq(GroupDO::getUsername, username);
         GroupDO hasGidFlag = baseMapper.selectOne(queryWrapper);
         return hasGidFlag == null;
     }

@@ -22,6 +22,14 @@ public interface GroupService extends IService<GroupDO> {
      * @Date 2024/12/3 16:20
      */
     void register(String groupName);
+    /**
+    * 新增短链接分组，附带username
+    * @param username 
+     * @param groupName 
+    * @return 
+    * @Date 2024/12/5 03:41
+    */
+    void register(String username,String groupName);
 
     /**
     * 查询当前用户的短链接分组
