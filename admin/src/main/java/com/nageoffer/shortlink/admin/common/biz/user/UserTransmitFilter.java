@@ -5,13 +5,16 @@ import com.alibaba.fastjson2.JSON;
 import com.google.common.collect.Lists;
 import com.nageoffer.shortlink.admin.common.constant.UserConstant;
 import com.nageoffer.shortlink.admin.common.convention.exception.ClientException;
+import com.nageoffer.shortlink.admin.common.convention.result.Results;
 import groovy.util.logging.Slf4j;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -47,17 +50,29 @@ public class UserTransmitFilter implements Filter {
                 String username = httpServletRequest.getHeader(UserConstant.USER_NAME_KEY);
                 //如果请求中缺少username或者token
                 if(!StrUtil.isAllNotEmpty(username,token)){
-                    throw new ClientException(USER_TOKEN_FAIL);
+                    //throw new ClientException(USER_TOKEN_FAIL);
+                    try {
+                        returnJson((HttpServletResponse) servletResponse, JSON.toJSONString(Results.failure(new ClientException(USER_TOKEN_FAIL))));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    return;
                 }
                 //查询redis
                 Object userInfoJsonStr =null;
                 try {
                     userInfoJsonStr = redisTemplate.opsForHash().get("login_" + username, token);
                     if(userInfoJsonStr ==null){
-                        throw new ClientException(USER_TOKEN_FAIL);
+                        returnJson((HttpServletResponse) servletResponse, JSON.toJSONString(Results.failure(new ClientException(USER_TOKEN_FAIL))));
+                        return;
                     }
                 } catch (Exception e) {
-                    throw new ClientException(USER_TOKEN_FAIL);
+                    try {
+                        returnJson((HttpServletResponse) servletResponse, JSON.toJSONString(Results.failure(new ClientException(USER_TOKEN_FAIL))));
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    return;
                 }
                 //写入ThreadLocal
                 UserInfoDTO userInfoDTO = JSON.parseObject(userInfoJsonStr.toString(), UserInfoDTO.class);
@@ -70,6 +85,20 @@ public class UserTransmitFilter implements Filter {
             filterChain.doFilter(servletRequest, servletResponse);
         } finally {
             UserContext.removeUser();
+        }
+    }
+    private void returnJson(HttpServletResponse response, String json) throws Exception {
+        PrintWriter writer = null;
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=utf-8");
+        try {
+            writer = response.getWriter();
+            writer.print(json);
+
+        } catch (IOException e) {
+        } finally {
+            if (writer != null)
+                writer.close();
         }
     }
 }
